@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 
-cuda=1  
+cuda=2 
 FreezeLayer=6
 sample=100
 commont=Bert-PN-addQ-CE-att

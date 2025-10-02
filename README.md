@@ -36,6 +36,13 @@ A performance do modelo LAQDA foi avaliada em quatro datasets de classificação
 | **Reuters** | 92.55% ± 1.25%    | 95.34% ± 1.15%    |
 | **20News** | 77.12% ± 4.31%    | 85.37% ± 2.91%    |
 
+<p align="center">
+  <img src="image.png" alt="Resultados 1-shot" width="45%"/>
+  <img src="image-1.png" alt="Resultados 5-shot" width="45%"/>
+</p>
+<p align="center"><em>Figura 1 – Resultados por pasta (1-shot à esquerda, 5-shot à direita).</em></p>
+
+
 #### Análise dos Resultados
 
 Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performance de modelos de meta-learning, especialmente em cenários de extrema escassez de dados (1-shot).
@@ -46,3 +53,8 @@ Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performanc
 
   * **Consistência e Generalização:** O modelo apresenta um ganho de performance consistente ao passar de 1-shot para 5-shot em todos os cenários. Isso mostra que, embora seja otimizado para poucos dados, sua capacidade de criar protótipos de qualidade escala bem com o aumento (ainda que pequeno) de informações disponíveis. A variação de performance entre os datasets (ex: HuffPost vs. Reuters) reflete a complexidade intrínseca e a separabilidade das classes em cada um, mas a metodologia LAQDA se prova eficaz em todos eles.
 
+<p align="center">
+  <img src="image-2.png" alt="Média 1-shot" width="45%"/>
+  <img src="image-3.png" alt="Média 5-shot" width="45%"/>
+</p>
+<p align="center"><em>Figura 2 – Acurácia média por dataset (1-shot à esquerda, 5-shot à direita).</em></p>
