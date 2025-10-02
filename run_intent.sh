@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e 
 
-cuda=2  
+cuda=1  
 FreezeLayer=6
 sample=100
 commont=Bert-PN-addQ-CE-att
@@ -9,7 +9,7 @@ k=4
 RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_results_intent" 
 
 for path in 01 02 03 04 05; do
-    echo "--- Iniciando processamento para o path: $path ---"
+    echo "Iniciando processamento para o path: $path"
 
     # --- Bloco do Banking77 ---
     BANKING_DIR="${RAID_BASE_PATH}/Banking77/${path}"
