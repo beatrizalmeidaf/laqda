@@ -57,4 +57,4 @@ Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performanc
   <img src="results/media-1shot.png" alt="Média 1-shot" width="80%"/>
   <img src="results/media-5shot.png" alt="Média 5-shot" width="80%"/>
 </p>
-<p align="center"><em>Figura 2 – Acurácia média por dataset.</em></p>
+<p align="center"><em>Figura 2 – Acurácia média por dataset</em></p>
