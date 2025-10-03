@@ -25,7 +25,7 @@ pip install -r requirements.txt
 sh run.sh
 ```
 
-### Resultados
+### Resultados Datasets Classificação
 
 A performance do modelo LAQDA foi avaliada em quatro datasets de classificação de texto amplamente utilizados. A tabela abaixo resume a acurácia média e o desvio padrão (%) calculados a partir de 5 execuções independentes para cada dataset, nos cenários de 1-shot e 5-shot.
 
@@ -40,7 +40,7 @@ A performance do modelo LAQDA foi avaliada em quatro datasets de classificação
   <img src="results/resultado-1shot.png" alt="Resultados 1-shot" width="80%"/>
   <img src="results/resultado-5shot.png" alt="Resultados 5-shot" width="80%"/>
 </p>
-<p align="center"><em>Figura 1 – Resultados por pasta (1-shot à esquerda, 5-shot à direita).</em></p>
+<p align="center"><em>Figura 1 – Resultados por pasta nos datasets de classificação de texto</em></p>
 
 
 #### Análise dos Resultados
@@ -58,3 +58,36 @@ Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performanc
   <img src="results/media-5shot.png" alt="Média 5-shot" width="80%"/>
 </p>
 <p align="center"><em>Figura 2 – Acurácia média por dataset</em></p>
+
+
+### Resultados em Datasets de Intenção
+
+A performance do modelo LAQDA também foi avaliada em quatro datasets de classificação de intenção amplamente utilizados. A tabela abaixo resume a acurácia média e o desvio padrão (%) calculados a partir de 5 execuções independentes para cada dataset, nos cenários de 1-shot e 5-shot.
+
+| Dataset       | Acurácia (1-shot) | Acurácia (5-shot) |
+| :------------ | :---------------- | :---------------- |
+| **Banking77** | 89.18% ± 1.19%    | 94.77% ± 0.52%    |
+| **Clinc150**  | 96.98% ± 0.53%    | 98.58% ± 0.20%    |
+| **Hwu64**     | 85.22% ± 1.47%    | 91.76% ± 1.33%    |
+| **Liu**       | 87.96% ± 1.88%    | 93.50% ± 1.13%    |
+
+<p align="center">
+  <img src="results/resultado_intent_1shot.png" alt="Resultados Intenção 1-shot" width="80%"/>
+  <img src="results/resultado_intent_5shot.png" alt="Resultados Intenção 5-shot" width="80%"/>
+</p>
+<p align="center"><em>Figura 3 – Resultados por pasta nos datasets de intenção</em></p>
+
+
+#### Análise dos Resultados
+
+Os resultados confirmam a robustez do LAQDA em cenários de classificação de intenção:
+
+* **Excelente Desempenho Geral:** Datasets como **Clinc150** atingem quase **97% de acurácia em 1-shot** e superam **98% em 5-shot**, evidenciando que a abordagem lida bem mesmo em tarefas com grande número de intenções distintas.
+* **Estabilidade em Dados Complexos:** O **Banking77**, conhecido por possuir intenções semanticamente próximas, manteve acurácias consistentes com **desvio padrão baixo**, o que indica a capacidade do modelo em diferenciar nuances de intenções similares.
+* **Impacto do Aumento de Suporte:** Assim como nos datasets de classificação de texto, há **ganhos consistentes ao passar de 1-shot para 5-shot**, com destaque para o Hwu64, que apresentou salto de mais de 6 pontos percentuais, demonstrando que o QDA e o Label-Adapter reforçam representações mesmo em domínios mais desafiadores.
+
+<p align="center">
+  <img src="results/media_intent_1shot.png" alt="Média Intenção 1-shot" width="80%"/>
+  <img src="results/media_intent_5shot.png" alt="Média Intenção 5-shot" width="80%"/>
+</p>
+<p align="center"><em>Figura 4 – Acurácia média por dataset de intenção</em></p>  
