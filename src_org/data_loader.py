@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import pandas as pd
 import json
+import os
 
 def get_data(path, mode='json'):
     """
@@ -64,46 +65,44 @@ class KShotTaskSampler(Sampler):
     def __iter__(self):
         """ Gera os episódios (lotes de tarefas). """
         for _ in range(self.episodes_per_epoch):
-            # inicializa listas para o lote atual
             support_set, query_set = [], []
 
             for task in range(self.num_tasks):
-                # seleciona 'k' classes aleatórias para o episódio atual
                 if self.fixed_tasks is None:
                     episode_classes = np.random.choice(self.dataset.df['class_id'].unique(), size=self.k, replace=False)
                 else:
-                    # usa uma lista pré-definida de classes se for fornecida
                     episode_classes = self.fixed_tasks[self.i_task % len(self.fixed_tasks)]
                     self.i_task += 1
 
-                # filtra o DataFrame para conter apenas as amostras das classes selecionadas
                 df = self.dataset.df[self.dataset.df['class_id'].isin(episode_classes)]
-
-                # monta o conjunto de suporte (support set)
                 support_k = {k: None for k in episode_classes}
-                episode_labels = [] # guardará os nomes das classes do episódio
+                
                 for k_class in episode_classes:
-                    # seleciona 'n' amostras aleatórias da classe 'k_class'
-                    support = df[df['class_id'] == k_class].sample(self.n)
-                    support_k[k_class] = support # guarda para não usar no query set
+                    class_samples = df[df['class_id'] == k_class]
+                    replace_support = len(class_samples) < self.n
+                    support = class_samples.sample(self.n, replace=replace_support)
+                    support_k[k_class] = support
 
-                    # adiciona as amostras de suporte à lista principal
                     for i, s in support.iterrows():
                         tmp = {"text": s['text'], "label": s['class_name']}
                         support_set.append(tmp)
-                    episode_labels.append(s['class_name']) # adiciona o nome da classe
 
-                # monta o conjunto de consulta (query set)
                 for k_class in episode_classes:
-                    # seleciona 'q' amostras da classe 'k_class' que NÃO ESTÃO no support set
-                    query = df[(df['class_id'] == k_class) & (~df['id'].isin(support_k[k_class]['id']))].sample(self.q)
-                  
+                    query_samples_available = df[(df['class_id'] == k_class) & (~df['id'].isin(support_k[k_class]['id']))]
+
+                    # se não houver amostras novas para a consulta (porque todas já foram usadas no suporte)
+                    if len(query_samples_available) == 0:
+                        # reutilize as amostras do próprio conjunto de suporte para a consulta
+                        query = support_k[k_class].sample(self.q, replace=True)
+                    else:
+                        replace_query = len(query_samples_available) < self.q
+                        query = query_samples_available.sample(self.q, replace=replace_query)
+                
                     for i, q in query.iterrows():
                         tmp = {"text": q['text'], "label": q['class_name']}
                         query_set.append(tmp)
                         
-            # retorna o episódio pronto para ser usado pelo DataLoader do PyTorch
-            yield support_set, query_set, episode_labels
+            yield support_set, query_set, episode_classes
 
 class MyDataset(Dataset):
     """
@@ -204,6 +203,61 @@ def write_data(datas, path):
 
 def get_label_dict(args):
     """
+    Cria um dicionário de mapeamento de rótulos (label -> id) dinamicamente
+    a partir do arquivo de treino, em vez de depender de um arquivo pré-existente.
+    """
+    # constrói o caminho para o arquivo de treino, que está no formato JSONL temporário
+    train_path = os.path.join(args.dataFile, 'train.json')
+
+    print(f"Gerando dicionário de rótulos a partir de: {train_path}")
+
+    if not os.path.exists(train_path):
+        print(f"ERRO: Arquivo de treino não encontrado em '{train_path}'. Não foi possível criar o dicionário de rótulos.")
+        return None
+
+    # usa um set para armazenar os rótulos únicos de forma eficiente
+    unique_labels = set()
+    try:
+        with open(train_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                # cada linha é um JSON, então carrega e pega o rótulo
+                data = json.loads(line)
+                unique_labels.add(data['label'])
+
+        # ordena os rótulos para garantir que o mapeamento seja sempre o mesmo
+        # (ex: 1, 2, 3, 4, 5)
+        sorted_labels = sorted(list(unique_labels))
+
+        # cria o dicionário final no formato {label: id}
+        labels_dict = {label: i for i, label in enumerate(sorted_labels)}
+        
+        print(f"Dicionário de rótulos criado com sucesso: {labels_dict}")
+        return labels_dict
+
+    except Exception as e:
+        print(f"Ocorreu um erro ao ler o arquivo de treino e gerar o dicionário de rótulos: {e}")
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""def get_label_dict(args):
+    
     Retorna um dicionário de mapeamento de rótulos (label) para IDs numéricos
     com base no nome do dataset fornecido nos argumentos.
 
@@ -213,7 +267,7 @@ def get_label_dict(args):
 
     Returns:
         dict: O dicionário de rótulos correspondente.
-    """
+    
     _hwu64_label_dict = {'audio/volume_down': 0, 'audio/volume_mute': 1, 'audio/volume_up': 2, 'calendar/query': 3, 'calendar/remove': 4, 'calendar/set': 5, 'email/addcontact': 6, 'email/query': 7, 'email/querycontact': 8, 'email/sendemail': 9, 'recommendation/events': 10, 'recommendation/locations': 11, 'recommendation/movies': 12, 'takeaway/order': 13, 'takeaway/query': 14, 'transport/query': 15, 'transport/taxi': 16, 'transport/ticket': 17, 'transport/traffic': 18, 'alarm/query': 19, 'alarm/remove': 20, 'alarm/set': 21, 'general/affirm': 22, 'general/commandstop': 23, 'general/confirm': 24, 'general/dontcare': 25, 'general/explain': 26, 'general/joke': 27, 'general/negate': 28, 'general/praise': 29,
                          'general/quirky': 30, 'general/repeat': 31, 'iot/cleaning': 32, 'iot/coffee': 33, 'iot/hue_lightchange': 34, 'iot/hue_lightdim': 35, 'iot/hue_lightoff': 36, 'iot/hue_lighton': 37, 'iot/hue_lightup': 38, 'iot/wemo_off': 39, 'iot/wemo_on': 40, 'qa/currency': 41, 'qa/definition': 42, 'qa/factoid': 43, 'qa/maths': 44, 'qa/stock': 45, 'social/post': 46, 'social/query': 47, 'weather/query': 48, 'cooking/recipe': 49, 'datetime/convert': 50, 'datetime/query': 51, 'lists/createoradd': 52, 'lists/query': 53, 'lists/remove': 54, 'music/likeness': 55, 'music/query': 56, 'music/settings': 57, 'news/query': 58, 'play/audiobook': 59, 'play/game': 60, 'play/music': 61, 'play/podcasts': 62, 'play/radio': 63}
 
@@ -534,4 +588,4 @@ def get_label_dict(args):
         return _liu_label_dict
     elif args.dataset == 'Hwu64':
         return _hwu64_label_dict
-
+"""

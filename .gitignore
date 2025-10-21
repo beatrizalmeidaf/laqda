@@ -2,3 +2,7 @@ __pycache__/
 venv/
 env/
 scripts/
+datasets-br/
+temp_data_for_training/
+*.out
+*.log

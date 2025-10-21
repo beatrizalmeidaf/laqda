@@ -101,7 +101,7 @@ def init_lr_scheduler(args, optim):
     return scheduler
 
 
-def deal_data(support_set, query_set, episode_labels):
+def deal_data(support_set, query_set, episode_labels, labels_dict):
     """
     Processa os dados de um lote (episódio) para o formato que o modelo espera.
     Principalmente, converte os rótulos de texto para o formato one-hot.
@@ -120,7 +120,7 @@ def deal_data(support_set, query_set, episode_labels):
     for label in labels:
         tmp = []
         for l in episode_labels:
-            if l == label:
+            if l == labels_dict[label]:
                 tmp.append(1)
             else:
                 tmp.append(0)
@@ -132,38 +132,21 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
     """
     A função principal que executa o loop de treinamento e validação.
     """
-    # train_writer = SummaryWriter(os.path.join(args.fileModelSave, 'train_log'))
-    
-    # se não houver um dataloader de validação, inicializa a variável de estado como None
     if val_dataloader is None:
         acc_best_state = None
     
-    # inicializa listas para armazenar o histórico de perdas e métricas para cada passo de treinamento
     train_loss, train_acc, train_p, train_r, train_f1, train_auc, train_topkacc = [], [], [], [], [], [], []
-    # inicializa listas para armazenar a média das métricas ao final de cada ÉPOCA de treinamento
     epoch_train_loss, epoch_train_acc, epoch_train_p, epoch_train_r, epoch_train_f1, epoch_train_auc, epoch_train_topkacc = [], [], [], [], [], [], []
-    # inicializa listas para armazenar o histórico de perdas e métricas para cada passo de validação
     val_loss, val_acc, val_p, val_r, val_f1, val_auc, val_topkacc = [], [], [], [], [], [], []
-    # inicializa listas para armazenar a média das métricas ao final de cada ÉPOCA de validação
     epoch_val_loss, epoch_val_acc, epoch_val_p, epoch_val_r, epoch_val_f1, epoch_val_auc, epoch_val_topkacc = [], [], [], [], [], [], []
     
-    # variáveis para rastrear o melhor desempenho e salvar o melhor modelo
-    best_p = 0
-    best_r = 0
-    best_f1 = 0
-    best_acc = 0
-    best_auc = 0
+    best_p, best_r, best_f1, best_acc, best_auc = 0, 0, 0, 0, 0
     loss_fn = Loss_fn(args)
     
-    # define o caminho completo onde o melhor modelo será salvo
     acc_best_model_path = os.path.join(args.fileModelSave, 'acc_best_model.pth')
-    # inicializa o contador para a lógica de parada antecipada (early stopping)
     cycle = 0
-    # carrega o dicionário de rótulos (label -> id)
     labels_dict = get_label_dict(args)
-    # inverte o dicionário para mapear id -> label (texto)
     id2label = {y: x for x, y in labels_dict.items()}
-
 
     for epoch in range(args.epochs):
         print('=== Época: {} ==='.format(epoch))
@@ -173,26 +156,21 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             break
 
         for i, batch in tqdm(enumerate(tr_dataloader)):
-            optim.zero_grad() # zera os gradientes da iteração anterior
+            optim.zero_grad()
             support_set, query_set, episode_labels = batch
             
-            # converte os IDs dos rótulos do episódio para seus nomes em texto
-            label_text = [id2label[int(el)] for el in episode_labels]
-            # prepara os textos e os rótulos no formato one-hot para o modelo e a loss
-            text, labels = deal_data(support_set, query_set, episode_labels)
+            # converte os rótulos para string para o tokenizador
+            label_text = [str(id2label[int(el)]) for el in episode_labels]
             
-            # passa os dados pelo modelo para obter as saídas
+            text, labels = deal_data(support_set, query_set, episode_labels, labels_dict)
+            
             model_outputs = model(text, label_text)
-            
-            # calcula a perda e as métricas usando a função de perda
             loss, p, r, f, acc, auc, topk_acc = loss_fn(model_outputs, labels)
             
-            # backpropagation
-            loss.backward()      # calcula os gradientes da perda em relação aos pesos do modelo
-            optim.step()         # atualiza os pesos do modelo usando o otimizador
-            lr_scheduler.step()  # atualiza a taxa de aprendizado
+            loss.backward()
+            optim.step()
+            lr_scheduler.step()
             
-            # armazena as métricas do passo atual
             train_loss.append(loss.item())
             train_p.append(p)
             train_r.append(r)
@@ -203,7 +181,6 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
 
             print('Train Loss: {}, Train p: {}, Train r: {}, Train f1: {},  Train acc: {},  Train auc: {}, Train topk acc: {}'.format(loss, p, r, f, acc, auc, topk_acc))
 
-        # ao final da época calcula a média das métricas dos últimos passos de treinamento
         avg_loss = np.mean(train_loss[-args.episodeTrain:])
         avg_acc = np.mean(train_acc[-args.episodeTrain:])
         avg_p = np.mean(train_p[-args.episodeTrain:])
@@ -221,22 +198,22 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
         epoch_train_auc.append(avg_auc)
         epoch_train_topkacc.append(avg_topkacc)
 
-    
         if val_dataloader is None:
             continue 
 
-        with torch.no_grad(): # desativa o cálculo de gradientes para a validação
-            model.eval() # coloca o modelo em modo de avaliação 
+        with torch.no_grad():
+            model.eval()
             
             for batch in tqdm(val_dataloader):
                 support_set, query_set, episode_labels = batch
-                text, labels = deal_data(support_set, query_set, episode_labels)
-                label_text = [id2label[int(el)] for el in episode_labels]
+                text, labels = deal_data(support_set, query_set, episode_labels, labels_dict)
+
+                # converte os rótulos para string para o tokenizador
+                label_text = [str(id2label[int(el)]) for el in episode_labels]
                 
                 model_outputs = model(text, label_text)
                 loss, p, r, f, acc, auc, topkacc = loss_fn(model_outputs, labels)
                 
-               
                 val_loss.append(loss.item())
                 val_acc.append(acc)
                 val_p.append(p)
@@ -244,8 +221,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
                 val_f1.append(f)
                 val_auc.append(auc)
                 val_topkacc.append(topkacc)
-                
-           
+            
             avg_loss = np.mean(val_loss[-args.episodeTrain:])
             avg_acc = np.mean(val_acc[-args.episodeTrain:])
             avg_p = np.mean(val_p[-args.episodeTrain:])
@@ -254,7 +230,6 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             avg_auc = np.mean(val_auc[-args.episodeTrain:])
             avg_topkacc = np.mean(val_topkacc[-args.episodeTrain:])
             
-           
             epoch_val_loss.append(avg_loss)
             epoch_val_acc.append(avg_acc)
             epoch_val_p.append(avg_p)
@@ -263,35 +238,23 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             epoch_val_auc.append(avg_auc)
             epoch_val_topkacc.append(avg_topkacc)
 
-   
-        postfix = ' (Melhor)' if avg_p >= best_p else ' (Melhor: {})'.format(best_p)
-        r_prefix = ' (Melhor)' if avg_r >= best_r else ' (Melhor: {})'.format(best_r)
-        f1_prefix = ' (Melhor)' if avg_f1 >= best_f1 else ' (Melhor: {})'.format(best_f1)
-        acc_prefix = ' (Melhor)' if avg_acc >= best_acc else ' (Melhor: {})'.format(best_acc)
-        auc_prefix = ' (Melhor)' if avg_auc >= best_auc else ' (Melhor: {})'.format(best_auc)
-        print('Média Val Loss: {}, Média Val p: {}{}, Média Val r: {}{}, Média Val f1: {}{}, Média Val acc: {}{}, Média Val auc: {}{},  Média Val topkacc: {}'.format(
-            avg_loss, avg_p, postfix, avg_r, r_prefix, avg_f1, f1_prefix, avg_acc, acc_prefix, avg_auc, auc_prefix, avg_topkacc))
-        
-       
-        cycle += 1
-        if avg_acc >= best_acc:
-            torch.save(model.state_dict(), acc_best_model_path)
-            best_acc = avg_acc
-            acc_best_state = model.state_dict()
-            cycle = 0 # reseta o contador de paciência pois houve melhora
+            postfix = ' (Melhor)' if avg_p >= best_p else ' (Melhor: {})'.format(best_p)
+            r_prefix = ' (Melhor)' if avg_r >= best_r else ' (Melhor: {})'.format(best_r)
+            f1_prefix = ' (Melhor)' if avg_f1 >= best_f1 else ' (Melhor: {})'.format(best_f1)
+            acc_prefix = ' (Melhor)' if avg_acc >= best_acc else ' (Melhor: {})'.format(best_acc)
+            auc_prefix = ' (Melhor)' if avg_auc >= best_auc else ' (Melhor: {})'.format(best_auc)
+            print('Média Val Loss: {}, Média Val p: {}{}, Média Val r: {}{}, Média Val f1: {}{}, Média Val acc: {}{}, Média Val auc: {}{},  Média Val topkacc: {}'.format(
+                avg_loss, avg_p, postfix, avg_r, r_prefix, avg_f1, f1_prefix, avg_acc, acc_prefix, avg_auc, auc_prefix, avg_topkacc))
             
-    # for i, t_f in enumerate(train_f1):
-    #     train_writer.add_scalar("Train/F1", t_f, i)
-    #     train_writer.add_scalar("Train/Loss", train_loss[i], i)
-
-    # for i, t_f in enumerate(val_f1):
-    #     train_writer.add_scalar("Val/F1", t_f, i)
-    #     train_writer.add_scalar("Val/Loss", val_loss[i], i)
-
-  
+            cycle += 1
+            if avg_acc >= best_acc:
+                torch.save(model.state_dict(), acc_best_model_path)
+                best_acc = avg_acc
+                acc_best_state = model.state_dict()
+                cycle = 0
+                
     for name in ['epoch_train_loss', 'epoch_train_p', 'epoch_train_r', 'epoch_train_f1', 'epoch_train_acc', 'epoch_train_auc', 'epoch_train_topkacc', 'epoch_val_loss', 'epoch_val_p', 'epoch_val_r', 'epoch_val_f1', 'epoch_val_acc', 'epoch_val_auc', 'epoch_val_topkacc']:
-        save_list_to_file(os.path.join(args.fileModelSave,
-                                       name + '.txt'), locals()[name])
+        save_list_to_file(os.path.join(args.fileModelSave, name + '.txt'), locals()[name])
 
     return model
 
@@ -299,14 +262,7 @@ def test(args, test_dataloader, model):
     """
     Função para testar o modelo treinado no conjunto de teste.
     """
-   
-    val_p = []
-    val_r = []
-    val_loss = []
-    val_f1 = []
-    val_acc = []
-    val_auc = []
-    val_topkacc = []
+    val_p, val_r, val_loss, val_f1, val_acc, val_auc, val_topkacc = [], [], [], [], [], [], []
     loss_fn = Loss_fn(args)
     
     with torch.no_grad(): 
@@ -315,11 +271,12 @@ def test(args, test_dataloader, model):
         labels_dict = get_label_dict(args)
         id2label = {y: x for x, y in labels_dict.items()}
         
-        # itera sobre cada lote (episódio) no dataloader de teste
         for batch in tqdm(test_dataloader):
             support_set, query_set, episode_labels = batch
-            text, labels = deal_data(support_set, query_set, episode_labels)
-            label_text = [id2label[int(el)] for el in episode_labels]
+            text, labels = deal_data(support_set, query_set, episode_labels, labels_dict)
+
+            # converte os rótulos para string para o tokenizador
+            label_text = [str(id2label[int(el)]) for el in episode_labels]
             
             model_outputs = model(text, label_text)
             loss, p, r, f, acc, auc, topkacc = loss_fn(model_outputs, labels)
@@ -356,7 +313,6 @@ def test(args, test_dataloader, model):
     with open(path, "a+") as fout:
         tmp = {"commont": args.commont, "data":args.dataFile,"shot": args.numKShot, "acc": avg_acc, "p": avg_p, "r": avg_r, "f1": avg_f1, "auc": avg_auc, "Loss": avg_loss}
         fout.write("%s\n" % json.dumps(tmp, ensure_ascii=False))
-
 
 def write_args_to_josn(args):
     """
