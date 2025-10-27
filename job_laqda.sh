@@ -3,7 +3,7 @@
 #SBATCH --job-name=laqda_br_run      # Nome do trabalho (mudei)
 #SBATCH --output=laqda_saida_%j.log  # Arquivo de saída (mudei)
 #SBATCH --error=laqda_erro_%j.log    # Arquivo de erro (mudei)
-#SBATCH --time=08:00:00              # Tempo máximo de execução (8 horas)
+#SBATCH --time=28:00:00              # Tempo máximo de execução (28 horas)
 #SBATCH --partition=h100n3       
 #SBATCH --gres=gpu:h100:1            # Pede UMA GPU
 
