@@ -136,7 +136,6 @@ class MyDataset(Dataset):
     def __getitem__(self, item):
         """
         Retorna uma amostra do dataset dado um índice.
-        Este método é obrigatório para um Dataset do PyTorch.
         
         Args:
             item (int): O índice da amostra desejada.
@@ -144,22 +143,21 @@ class MyDataset(Dataset):
         Returns:
             tuple: Uma tupla contendo (texto, rótulo_numérico).
         """
-        # Pega o rótulo numérico (class_id) para o índice 'item'.
+        # pega o rótulo numérico (class_id) para o índice 'item'
         label = self.datasetid_to_class_id[item]
-        # Pega o texto para o índice 'item'.
+        # pega o texto para o índice 'item'.
         text = self.df['text'][item]
 
         return text, label
 
     def __len__(self):
         """
-        Retorna o tamanho total do dataset.
-        Este método é obrigatório para um Dataset do PyTorch.
+        Retorna o tamanho total do dataset
         """
         return len(self.df)
 
     def num_classes(self):
-        """ Retorna o número de classes únicas no dataset. """
+        """ Retorna o número de classes únicas no dataset """
         return len(self.df['class_name'].unique())
 
     @staticmethod
@@ -175,15 +173,12 @@ class MyDataset(Dataset):
         """
         texts = []
         print(f'Indexando {path}...')
-        
-        # Usa a função auxiliar para carregar os dados do arquivo JSON
+
         datas = get_data(path)
-        # Itera sobre os dados carregados
         for line in tqdm(datas):     
-            # Adiciona um dicionário formatado à lista 'texts'
             texts.append({
-                'text': line["sentence"],      # Pega a sentença
-                'class_name': line["label"]    # Pega o rótulo (nome da classe)
+                'text': line["sentence"],      # pega a sentença
+                'class_name': line["label"]    # pega o rótulo 
             })
         return texts
 
