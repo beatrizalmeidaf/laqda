@@ -39,7 +39,7 @@ def get_parser():
     parser.add_argument('--numNWay',
                         type=int,
                         help='number of classes per episode',
-                        default=3)
+                        default=2)
 
     parser.add_argument('--numKShot',
                         type=int,
@@ -60,10 +60,12 @@ def get_parser():
                         type=int,
                         help='number of tasks per epoch in testing process',
                         default=1000)
+                        
     parser.add_argument('--learning_rate',
                         type=float,
                         help='learning rate for the model, default=0.00001',
                         default=0.00001)
+
     parser.add_argument('--seed',
                         type=int,
                         default=42)
@@ -86,7 +88,7 @@ def get_parser():
     parser.add_argument('--weight_decay',
                         type=float,
                         help='ratio of decay',
-                        default=0.001) # 0.1 ou 0.0001
+                        default=6.68e-04) # 0.1 ou 0.0001 6.68e-04 0.001
 
     parser.add_argument('--dropout_rate',
                         type=float,

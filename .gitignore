@@ -7,3 +7,6 @@ temp_data_for_training/
 *.out
 *.log
 outputs/
+job_laqda.sh 
+job_qevasion.sh 
+run_qevasion.sh

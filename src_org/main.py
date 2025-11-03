@@ -26,6 +26,7 @@ def set_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
 
+
 def init_dataloader(args, mode):
     """
     Inicializa e retorna um Sampler para um modo específico (train, valid, test).
@@ -38,7 +39,7 @@ def init_dataloader(args, mode):
     
     try:
         dataset = MyDataset(filePath)
-        # Verifica se o dataset tem classes suficientes para o N-way
+        # verifica se o dataset tem classes suficientes para o N-way
         if dataset.num_classes() < args.numNWay:
              print(f"ERRO: O dataset {filePath} tem apenas {dataset.num_classes()} classes, mas a tarefa é {args.numNWay}-way.")
              raise ValueError("Número insuficiente de classes no dataset para N-way.")
@@ -48,6 +49,7 @@ def init_dataloader(args, mode):
     except Exception as e:
         print(f"Erro ao inicializar dataloader para {filePath}: {e}")
         raise 
+
 
 def save_list_to_file(path, thelist):
     """
@@ -74,7 +76,6 @@ def init_model(args):
         print("Usando CPU")
         device = torch.device('cpu')
 
-    # Validação dos argumentos relacionados ao modelo antes de criar
     if not args.fileVocab or not args.fileModelConfig or not args.fileModel:
          raise ValueError("Caminhos para Vocab, Config ou Modelo não foram especificados.")
          
@@ -92,7 +93,7 @@ def init_optim(args, model):
         {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], 'weight_decay': 0.0}
     ]
     
-    # Verifica se há parâmetros treináveis
+    # verifica se há parâmetros treináveis
     has_trainable_params = any(p.requires_grad for group in optimizer_grouped_parameters for p in group['params'])
     if not has_trainable_params:
          print("Aviso: Nenhum parâmetro requer gradiente. Verifique a configuração de --numFreeze.")
@@ -127,14 +128,14 @@ def deal_data(support_set, query_set, episode_internal_ids, labels_dict):
     
     one_hot_labels = []
     num_classes_in_episode = len(episode_internal_ids)
-    # Cria mapeamento reverso ID_interno -> índice_no_episódio (0 a k-1)
+    # cria mapeamento reverso ID_interno -> índice_no_episódio (0 a k-1)
     internal_id_to_episode_index = {internal_id: idx for idx, internal_id in enumerate(episode_internal_ids)}
 
     for orig_label in original_labels:
-        internal_id = labels_dict.get(orig_label) # Mapeia label original ('Negativo') para ID interno (0)
+        internal_id = labels_dict.get(orig_label) # mapeia label original ('Negativo') para ID interno (0)
         if internal_id is None or internal_id not in internal_id_to_episode_index:
              print(f"Aviso em deal_data: Label '{orig_label}' inválido ou não pertence a este episódio {episode_internal_ids}. Labels dict: {labels_dict}")
-             one_hot = [-1] * num_classes_in_episode # Vetor inválido para sinalizar erro
+             one_hot = [-1] * num_classes_in_episode 
         else:
             episode_index = internal_id_to_episode_index[internal_id]
             one_hot = [0] * num_classes_in_episode
@@ -147,26 +148,26 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
     """
     A função principal que executa o loop de treinamento e validação.
     """
-    acc_best_state = None # Armazena o state_dict do melhor modelo de validação
+    acc_best_state = None # armazena o state_dict do melhor modelo de validação
     
-    # Listas para métricas por época (para salvar no final)
+    # listas para métricas por época (para salvar no final)
     epoch_train_loss, epoch_train_acc, epoch_train_p, epoch_train_r, epoch_train_f1, epoch_train_auc, epoch_train_topkacc = [], [], [], [], [], [], []
     epoch_val_loss, epoch_val_acc, epoch_val_p, epoch_val_r, epoch_val_f1, epoch_val_auc, epoch_val_topkacc = [], [], [], [], [], [], []
     
-    best_acc = 0.0 # Melhor acurácia de validação vista até agora
-    best_p, best_r, best_f1, best_auc = 0.0, 0.0, 0.0, 0.0 # Para formatação do print
+    best_acc = 0.0 # melhor acurácia de validação vista até agora
+    best_p, best_r, best_f1, best_auc = 0.0, 0.0, 0.0, 0.0
     
     loss_fn = Loss_fn(args)
     
     acc_best_model_path = os.path.join(args.fileModelSave, 'acc_best_model.pth')
-    cycle = 0 # Contador para early stopping
+    cycle = 0 # contador para early stopping
     
-    labels_dict = get_label_dict(args) # Ex: {'Negativo': 0, 'Neutro': 1, 'Positivo': 2}
+    labels_dict = get_label_dict(args) 
     if labels_dict is None: return None 
 
     id2label = {idx: original_label for original_label, idx in labels_dict.items()}
 
-    device = next(model.parameters()).device # Pega o device do modelo uma vez
+    device = next(model.parameters()).device # pega o device do modelo uma vez
 
     for epoch in range(args.epochs):
         print('=== Época: {} ==='.format(epoch))
@@ -176,7 +177,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             print(f"Parando cedo na época {epoch}.")
             break
 
-        # Listas para métricas dos batches DENTRO desta época
+        # listas para métricas dos batches DENTRO dessa época
         batch_train_loss, batch_train_acc, batch_train_p, batch_train_r, batch_train_f1, batch_train_auc, batch_train_topkacc = [], [], [], [], [], [], []
 
         for i, batch in tqdm(enumerate(tr_dataloader), total=args.episodeTrain, desc=f"Treino Época {epoch}"):
@@ -184,7 +185,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             support_set, query_set, episode_internal_ids = batch # IDs: [0, 1, 2] etc.
             
             try:
-                # Usa id2label para converter IDs internos de volta para as strings corretas
+                # usa id2label para converter IDs internos de volta para as strings corretas
                 label_text = [id2label[int(el)] for el in episode_internal_ids] 
             except KeyError as e:
                  print(f"\nErro no treino ao gerar label_text: ID {e} não encontrado em id2label {id2label}. Episódio: {episode_internal_ids}")
@@ -193,23 +194,23 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
 
             text, one_hot_labels = deal_data(support_set, query_set, episode_internal_ids, labels_dict)
             
-            # Converte one_hot_labels para tensor
+            # converte one_hot_labels para tensor
             one_hot_labels_tensor = torch.tensor(one_hot_labels, dtype=torch.float).to(device)
 
-            # Pula batch se houver labels inválidos
+            # pula batch se houver labels inválidos
             if (one_hot_labels_tensor == -1).any():
                 print("Aviso: Labels inválidos detectados no batch de treino. Pulando.")
                 continue 
 
             try:
-                 model_outputs = model(text, label_text) # Passa textos e as STRINGS dos labels
+                 model_outputs = model(text, label_text) # passa textos e as STRINGS dos labels
                  loss, p, r, f, acc, auc, topk_acc = loss_fn(model_outputs, one_hot_labels_tensor)
             except Exception as e:
                  print(f"\nErro durante o forward/loss no treino (batch {i}): {e}")
                  print(f"  Input text (primeiros 10): {text[:10]}")
                  print(f"  Input label_text: {label_text}")
                  print(f"  Labels tensor shape: {one_hot_labels_tensor.shape}")
-                 continue # Pula este batch
+                 continue 
 
             if torch.isnan(loss) or torch.isinf(loss):
                  print(f"Aviso: Perda inválida (NaN ou Inf) no treino (batch {i}). Pulando backward.")
@@ -219,7 +220,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             optim.step()
             lr_scheduler.step()
             
-            # Guarda métricas do batch
+            # guarda métricas do batch
             batch_train_loss.append(loss.item())
             batch_train_p.append(p)
             batch_train_r.append(r)
@@ -229,7 +230,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             batch_train_topkacc.append(topk_acc.item() if isinstance(topk_acc, torch.Tensor) else topk_acc)
 
 
-        # Calcula e imprime médias da época de treino
+        # calcula e imprime médias da época de treino
         avg_loss = np.mean(batch_train_loss) if batch_train_loss else 0
         avg_acc = np.mean(batch_train_acc) if batch_train_acc else 0
         avg_p = np.mean(batch_train_p) if batch_train_p else 0
@@ -240,15 +241,15 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
         print('\nMédia Train Época {}: Loss: {:.4f}, P: {:.4f}, R: {:.4f}, F1: {:.4f}, Acc: {:.4f}, AUC: {:.4f}, TopKAcc: {:.4f}'.format(
             epoch, avg_loss, avg_p, avg_r, avg_f1, avg_acc, avg_auc, avg_topkacc))
         
-        # Guarda médias da época
+        # guarda médias da época
         epoch_train_loss.append(avg_loss); epoch_train_acc.append(avg_acc); epoch_train_p.append(avg_p)
         epoch_train_r.append(avg_r); epoch_train_f1.append(avg_f1); epoch_train_auc.append(avg_auc)
         epoch_train_topkacc.append(avg_topkacc)
 
         # validação
         if val_dataloader is None:
-             # Salva o modelo da última época se não houver validação
-             if epoch == args.epochs - 1: # Salva apenas no final
+             # salva o modelo da última época se não houver validação
+             if epoch == args.epochs - 1: # salva apenas no final
                  print("Salvando modelo da última época (sem validação).")
                  torch.save(model.state_dict(), acc_best_model_path)
              continue 
@@ -280,9 +281,8 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
                     loss, p, r, f, acc, auc, topkacc = loss_fn(model_outputs, one_hot_labels_tensor)
                 except Exception as e:
                      print(f"\nErro durante o forward/loss na validação: {e}")
-                     continue # Pula este batch de validação
+                     continue 
 
-                # Guarda métricas do batch de validação
                 batch_val_loss.append(loss.item())
                 batch_val_acc.append(acc)
                 batch_val_p.append(p)
@@ -291,7 +291,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
                 batch_val_auc.append(auc)
                 batch_val_topkacc.append(topkacc.item() if isinstance(topkacc, torch.Tensor) else topkacc)
             
-            # Calcula médias da época de validação
+            # calcula médias da época de validação
             avg_loss = np.mean(batch_val_loss) if batch_val_loss else 0
             avg_acc = np.mean(batch_val_acc) if batch_val_acc else 0
             avg_p = np.mean(batch_val_p) if batch_val_p else 0
@@ -300,13 +300,12 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             avg_auc = np.mean(batch_val_auc) if batch_val_auc else 0
             avg_topkacc = np.mean(batch_val_topkacc) if batch_val_topkacc else 0
             
-            # Guarda médias da época
+            # guarda médias da época
             epoch_val_loss.append(avg_loss); epoch_val_acc.append(avg_acc); epoch_val_p.append(avg_p)
             epoch_val_r.append(avg_r); epoch_val_f1.append(avg_f1); epoch_val_auc.append(avg_auc)
             epoch_val_topkacc.append(avg_topkacc)
 
-            # Lógica para salvar melhor modelo e early stopping
-            # Usa > em vez de >= para salvar apenas se houver melhoria estrita
+            # lógica para salvar melhor modelo e early stopping
             acc_prefix = ' (Melhor)' if avg_acc > best_acc else ' (Melhor: {:.4f})'.format(best_acc)
             print('\nMédia Val Época {}: Loss: {:.4f}, P: {:.4f}, R: {:.4f}, F1: {:.4f}, Acc: {:.4f}{}, AUC: {:.4f}, TopKAcc: {:.4f}'.format(
                 epoch, avg_loss, avg_p, avg_r, avg_f1, avg_acc, acc_prefix, avg_auc, avg_topkacc))
@@ -315,15 +314,14 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
                 print(f"Nova melhor acurácia de validação: {avg_acc:.4f}. Salvando modelo...")
                 torch.save(model.state_dict(), acc_best_model_path)
                 best_acc = avg_acc
-                acc_best_state = model.state_dict() # Guarda o estado na memória também
-                # Atualiza as outras 'best' para o print
+                acc_best_state = model.state_dict() # guarda o estado na memória também
                 best_p, best_r, best_f1, best_auc = avg_p, avg_r, avg_f1, avg_auc
                 cycle = 0 
             else:
                 cycle += 1 
                 
 
-    # Salva as métricas de todas as épocas
+    # salva as métricas de todas as épocas
     metrics_to_save = {
         'epoch_train_loss': epoch_train_loss, 'epoch_train_p': epoch_train_p, 
         'epoch_train_r': epoch_train_r, 'epoch_train_f1': epoch_train_f1, 
@@ -340,7 +338,7 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
              save_list_to_file(os.path.join(args.fileModelSave, name + '.txt'), data_list)
 
     print("Treinamento concluído.")
-    # Carrega o melhor estado salvo na memória ou do arquivo
+    # carrega o melhor estado salvo na memória ou do arquivo
     if acc_best_state is not None:
          print("Carregando o melhor estado do modelo (da validação) para teste.")
          model.load_state_dict(acc_best_state)
@@ -360,7 +358,7 @@ def test(args, test_dataloader, model):
     batch_test_loss, batch_test_acc, batch_test_p, batch_test_r, batch_test_f1, batch_test_auc, batch_test_topkacc = [], [], [], [], [], [], []
     loss_fn = Loss_fn(args)
     
-    model.eval() # Modo de avaliação
+    model.eval() # modo de avaliação
     
     labels_dict = get_label_dict(args)
     if labels_dict is None: 
@@ -394,9 +392,9 @@ def test(args, test_dataloader, model):
                  loss, p, r, f, acc, auc, topkacc = loss_fn(model_outputs, one_hot_labels_tensor)
             except Exception as e:
                  print(f"\nErro durante o forward/loss no teste: {e}")
-                 continue # Pula este batch de teste
+                 continue 
 
-            # Guarda métricas
+            # guarda métricas
             batch_test_loss.append(loss.item())
             batch_test_acc.append(acc)
             batch_test_p.append(p)
@@ -405,7 +403,7 @@ def test(args, test_dataloader, model):
             batch_test_auc.append(auc)
             batch_test_topkacc.append(topkacc.item() if isinstance(topkacc, torch.Tensor) else topkacc)
             
-    # Calcula médias do teste
+    # calcula médias do teste
     avg_loss = np.mean(batch_test_loss) if batch_test_loss else 0
     avg_acc = np.mean(batch_test_acc) if batch_test_acc else 0
     avg_p = np.mean(batch_test_p) if batch_test_p else 0
@@ -414,7 +412,6 @@ def test(args, test_dataloader, model):
     avg_auc = np.mean(batch_test_auc) if batch_test_auc else 0
     avg_topkacc = np.mean(batch_test_topkacc) if batch_test_topkacc else 0
 
-    # Imprime resultados finais
     print('\nResultados Finais do Teste')
     print(f'Test Loss: {avg_loss:.4f}')
     print(f'Test Acc: {avg_acc:.4f}')
@@ -424,7 +421,6 @@ def test(args, test_dataloader, model):
     print(f'Test AUC: {avg_auc:.4f}')
     print(f'Test TopKAcc: {avg_topkacc:.4f}') 
 
-    # Salva resultados
     os.makedirs(args.fileModelSave, exist_ok=True) 
     result_csv_path = os.path.join(args.fileModelSave, 'result.csv')
     try:
@@ -458,7 +454,7 @@ def write_args_to_json(args):
         os.makedirs(args.fileModelSave, exist_ok=True) 
         args_dict = vars(args) 
         safe_args = {k: v.tolist() if isinstance(v, torch.Tensor) else v for k, v in args_dict.items()}
-        # Adiciona uma verificação extra para outros tipos não serializáveis se necessário
+
         safe_args = {k: str(v) if not isinstance(v, (str, int, float, bool, list, dict, type(None))) else v for k, v in safe_args.items()}
         json_str = json.dumps(safe_args, indent=4) 
         with open(path, 'w', encoding='utf-8') as json_file: 
@@ -469,14 +465,12 @@ def main():
     """ Função principal. """
     args = get_parser().parse_args()
 
-    # Cria diretório de salvamento
     try: os.makedirs(args.fileModelSave, exist_ok=True)
     except OSError as e: print(f"Erro ao criar diretório {args.fileModelSave}: {e}"); return
 
     write_args_to_json(args)
     set_seed(args.seed if hasattr(args, 'seed') else 42) 
     
-    # Inicializa componentes
     try:
         model = init_model(args)
         if model is None: raise ValueError("Falha ao inicializar o modelo.")
@@ -493,7 +487,7 @@ def main():
         print(f"Erro fatal durante a inicialização: {e}")
         return
 
-    # Treinamento
+    # treinamento
     trained_model = train(args=args,
                           tr_dataloader=tr_sampler, 
                           val_dataloader=val_sampler, 
@@ -505,7 +499,7 @@ def main():
          print("Treinamento falhou ou foi abortado. Encerrando.")
          return
 
-    # Teste
+    # teste
     print('\nTestando com o melhor modelo...')
     test(args=args,
          test_dataloader=test_sampler, 

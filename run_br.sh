@@ -2,12 +2,12 @@
 set -e 
 
 cuda=0
-commont="exp6"
-learning_rate=2e-5
-RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_results_br_exp6"
-DATASET_BASE_PATH="datasets-br/reviews_remapped_sentiment"
+commont="exp_final_binary"
+learning_rate=1.7e-5
+RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_results_br_exp_binary"
+DATASET_BASE_PATH="datasets-br/reviews_remapped_sentiment_binary"
 
-DATASETS_TO_RUN=("B2WCorpus" "BrandsCorpus" "ReProCorpus")
+DATASETS_TO_RUN=("B2WCorpus" "BrandsCorpus" "ReProCorpus" "UTLCorpus")
 
 for dataset_name in "${DATASETS_TO_RUN[@]}"; do
     echo "============================================================"
@@ -43,7 +43,7 @@ for dataset_name in "${DATASETS_TO_RUN[@]}"; do
             --fileModelConfig="neuralmind/bert-base-portuguese-cased" \
             --fileModel="neuralmind/bert-base-portuguese-cased" \
             --sample 1 \
-            --numFreeze 6 \
+            --numFreeze 11 \
             --learning_rate ${learning_rate} \
             --commont="$commont"
 
@@ -59,7 +59,7 @@ for dataset_name in "${DATASETS_TO_RUN[@]}"; do
             --fileModelConfig="neuralmind/bert-base-portuguese-cased" \
             --fileModel="neuralmind/bert-base-portuguese-cased" \
             --sample 1 \
-            --numFreeze 6 \
+            --numFreeze 11 \
             --learning_rate ${learning_rate} \
             --commont="$commont"
     done
