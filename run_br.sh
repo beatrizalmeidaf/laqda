@@ -33,7 +33,7 @@ for dataset_name in "${DATASETS_TO_RUN[@]}"; do
 
         # execução para 5-shot
         echo "Rodando ${dataset_name} (5-shot) para o fold $path..."
-        python src_org/main.py \
+        python src/main.py \
             --dataset "$dataset_name" \
             --dataFile "$SOURCE_DATA_DIR" \
             --fileModelSave "$RESULTS_DIR" \
@@ -49,7 +49,7 @@ for dataset_name in "${DATASETS_TO_RUN[@]}"; do
 
         # execução para 1-shot
         echo "Rodando ${dataset_name} (1-shot) para o fold $path..."
-        python src_org/main.py \
+        python src/main.py \
             --dataset "$dataset_name" \
             --dataFile "$SOURCE_DATA_DIR" \
             --fileModelSave "$RESULTS_DIR" \
