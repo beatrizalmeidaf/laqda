@@ -4,11 +4,18 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-ORIGINAL_DATA_BASE_PATH = Path("datasets-br/reviews") 
+ORIGINAL_DATA_BASE_PATH = Path("../datasets-br/reviews") 
 
-REMAPPED_DATA_BASE_PATH = Path("datasets-br/reviews_remapped_sentiment_binary") 
+REMAPPED_DATA_BASE_PATH = Path("../datasets-br/reviews_remapped_sentiment_binary") 
 
-DATASETS_TO_PROCESS = ["B2WCorpus", "BrandsCorpus", "ReProCorpus", "UTLCorpus"]
+DATASETS_TO_PROCESS = ["UTLCorpus"]
+#DATASETS_TO_PROCESS = ["BuscapeCorpus", "KaggleTweetsCorpus", "OlistCorpus"]
+
+"""LABEL_MAP = {
+    
+    0: "Negativo",
+    1: "Positivo"
+}"""
 
 LABEL_MAP = {
     
@@ -18,7 +25,6 @@ LABEL_MAP = {
     4: "Positivo",
     5: "Positivo"
 }
-
 
 def remap_labels_in_file(input_path: Path, output_path: Path):
     """
