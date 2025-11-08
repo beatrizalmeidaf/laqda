@@ -27,7 +27,7 @@ def set_seed(seed):
     random.seed(seed)
 
 
-def init_dataloader(args, mode):
+def init_dataloader(args, mode, labels_dict): # <-- MODIFICADO: recebe labels_dict
     """
     Inicializa e retorna um Sampler para um modo específico (train, valid, test).
     """
@@ -38,17 +38,23 @@ def init_dataloader(args, mode):
         episode_per_epoch = args.episodeTest
     
     try:
-        dataset = MyDataset(filePath)
+        dataset = MyDataset(filePath, labels_dict) 
+        
+        if len(dataset) == 0:
+            print(f"AVISO: O dataset {filePath} está vazio ou não contém labels válidas do mapa. Pulando.")
+            return None 
+
         # verifica se o dataset tem classes suficientes para o N-way
         if dataset.num_classes() < args.numNWay:
-             print(f"ERRO: O dataset {filePath} tem apenas {dataset.num_classes()} classes, mas a tarefa é {args.numNWay}-way.")
-             raise ValueError("Número insuficiente de classes no dataset para N-way.")
-             
+            print(f"AVISO: O dataset {filePath} tem apenas {dataset.num_classes()} classes (das {len(labels_dict)} esperadas), mas a tarefa é {args.numNWay}-way.")
+            if args.numNWay > dataset.num_classes():
+                raise ValueError(f"Número insuficiente de classes ({dataset.num_classes()}) em {filePath} para a tarefa {args.numNWay}-way.")
+                
         sampler = KShotTaskSampler(dataset, episodes_per_epoch=episode_per_epoch, n=args.numKShot, k=args.numNWay, q=args.numQShot, num_tasks=1)
         return sampler
     except Exception as e:
         print(f"Erro ao inicializar dataloader para {filePath}: {e}")
-        raise 
+        raise
 
 
 def save_list_to_file(path, thelist):
@@ -144,29 +150,26 @@ def deal_data(support_set, query_set, episode_internal_ids, labels_dict):
 
     return text, one_hot_labels
 
-def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
+def train(args, tr_dataloader, model, optim, lr_scheduler, labels_dict, val_dataloader=None):
     """
     A função principal que executa o loop de treinamento e validação.
     """
-    acc_best_state = None # armazena o state_dict do melhor modelo de validação
+    acc_best_state = None 
     
-    # listas para métricas por época (para salvar no final)
     epoch_train_loss, epoch_train_acc, epoch_train_p, epoch_train_r, epoch_train_f1, epoch_train_auc, epoch_train_topkacc = [], [], [], [], [], [], []
     epoch_val_loss, epoch_val_acc, epoch_val_p, epoch_val_r, epoch_val_f1, epoch_val_auc, epoch_val_topkacc = [], [], [], [], [], [], []
     
-    best_acc = 0.0 # melhor acurácia de validação vista até agora
+    best_acc = 0.0 
     best_p, best_r, best_f1, best_auc = 0.0, 0.0, 0.0, 0.0
-    
     loss_fn = Loss_fn(args)
-    
     acc_best_model_path = os.path.join(args.fileModelSave, 'acc_best_model.pth')
-    cycle = 0 # contador para early stopping
+    cycle = 0 
     
-    labels_dict = get_label_dict(args) 
-    if labels_dict is None: return None 
+    if labels_dict is None: 
+        print("Erro: labels_dict não foi fornecido para a função train.")
+        return None 
 
     id2label = {idx: original_label for original_label, idx in labels_dict.items()}
-
     device = next(model.parameters()).device # pega o device do modelo uma vez
 
     for epoch in range(args.epochs):
@@ -353,21 +356,19 @@ def train(args, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
          
     return model
 
-def test(args, test_dataloader, model):
+def test(args, test_dataloader, model, labels_dict):
     """ Testa o modelo treinado. """
     batch_test_loss, batch_test_acc, batch_test_p, batch_test_r, batch_test_f1, batch_test_auc, batch_test_topkacc = [], [], [], [], [], [], []
     loss_fn = Loss_fn(args)
     
-    model.eval() # modo de avaliação
+    model.eval()
     
-    labels_dict = get_label_dict(args)
     if labels_dict is None: 
         print("Erro crítico no teste: Dicionário de rótulos não encontrado.")
         return 
         
     id2label = {idx: original_label for original_label, idx in labels_dict.items()}
-    
-    device = next(model.parameters()).device 
+    device = next(model.parameters()).device
     
     with torch.no_grad(): 
         for batch in tqdm(test_dataloader, total=args.episodeTest, desc="Teste"):
@@ -472,13 +473,30 @@ def main():
     set_seed(args.seed if hasattr(args, 'seed') else 42) 
     
     try:
+        labels_dict = get_label_dict(args) 
+        if labels_dict is None: 
+            raise ValueError("Falha ao criar o dicionário de rótulos a partir do train.json.")
+
         model = init_model(args)
         if model is None: raise ValueError("Falha ao inicializar o modelo.")
         
-        tr_sampler = init_dataloader(args, 'train')
-        val_sampler = init_dataloader(args, 'valid')
-        test_sampler = init_dataloader(args, 'test')
+        print("\nInicializando Dataloader de Treino...")
+        tr_sampler = init_dataloader(args, 'train', labels_dict)
         
+        print("\nInicializando Dataloader de Validação...")
+        val_sampler = init_dataloader(args, 'valid', labels_dict)
+        
+        print("\nInicializando Dataloader de Teste...")
+        test_sampler = init_dataloader(args, 'test', labels_dict)
+        
+        # trata o caso de valid/test não existirem ou estarem vazios
+        if tr_sampler is None:
+             raise ValueError("Dataloader de treino não pôde ser criado ou está vazio.")
+        if val_sampler is None:
+            print("Aviso: Dataloader de validação não foi criado. O modelo não será validado por época.")
+        if test_sampler is None:
+            print("Aviso: Dataloader de teste não foi criado. O modelo não será testado no final.")
+
         optim = init_optim(args, model)
         if optim is None: raise ValueError("Falha ao inicializar o otimizador.")
         
@@ -487,23 +505,26 @@ def main():
         print(f"Erro fatal durante a inicialização: {e}")
         return
 
-    # treinamento
     trained_model = train(args=args,
                           tr_dataloader=tr_sampler, 
                           val_dataloader=val_sampler, 
                           model=model,
                           optim=optim,
-                          lr_scheduler=lr_scheduler)
+                          lr_scheduler=lr_scheduler,
+                          labels_dict=labels_dict) 
     
     if trained_model is None:
          print("Treinamento falhou ou foi abortado. Encerrando.")
          return
 
-    # teste
-    print('\nTestando com o melhor modelo...')
-    test(args=args,
-         test_dataloader=test_sampler, 
-         model=trained_model) 
+    if test_sampler:
+        print('\nTestando com o melhor modelo...')
+        test(args=args,
+             test_dataloader=test_sampler, 
+             model=trained_model,
+             labels_dict=labels_dict) 
+    else:
+        print("\nNenhum dataset de teste para rodar. Encerrando.")
 
 if __name__ == '__main__':
     main()

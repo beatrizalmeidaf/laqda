@@ -109,28 +109,46 @@ class MyDataset(Dataset):
     Classe de Dataset customizada para carregar dados de texto para o PyTorch.
     Herda da classe Dataset do PyTorch.
     """
-    def __init__(self, path):
+    def __init__(self, path, class_name_to_id_map):
         """
         Inicializador da classe.
         
         Args:
-            path (str): Caminho para o arquivo de dados (geralmente .json).
+            path (str): Caminho para o arquivo de dados (geralmente .jsonl).
+            class_name_to_id_map (dict): O dicionário global {label: id} 
+                                        gerado a partir do train.json.
         """
-        # carrega os dados do arquivo e os converte em um DataFrame
-        # self.index_subset(path) retorna uma lista de dicionários
-        self.df = pd.DataFrame(self.index_subset(path))
+        # carrega os dados do arquivo
+        all_data = self.index_subset(path)
+        if not all_data:
+            print(f"Aviso: Nenhum dado carregado de {path}.")
+            self.df = pd.DataFrame(columns=['text', 'class_name', 'id', 'class_id'])
+            self.datasetid_to_class_id = {}
+            return
 
-        # adiciona uma coluna 'id' ao DataFrame que corresponde ao índice da linha para garantir que cada amostra tenha um identificador único
+        self.df = pd.DataFrame(all_data)
         self.df = self.df.assign(id=self.df.index.values)
 
-        # pega todos os nomes de classes únicos e os ordena.
-        self.unique_characters = sorted(self.df['class_name'].unique())
-        # cria um dicionário de mapeamento: {'nome_da_classe': id_numerico}
-        self.class_name_to_id = {self.unique_characters[i]: i for i in range(self.num_classes())}
-        # cria uma nova coluna 'class_id' no DataFrame com os IDs numéricos
+        # usa o mapa externo
+        self.class_name_to_id = class_name_to_id_map
+
+        # filtra o dataframe para conter apenas labels que existem no mapa
+        initial_rows = len(self.df)
+        self.df = self.df[self.df['class_name'].isin(self.class_name_to_id.keys())]
+        filtered_rows = len(self.df)
+        if initial_rows > filtered_rows:
+            print(f"Filtradas {initial_rows - filtered_rows} amostras de {path} com labels desconhecidas (que não estavam no mapa de treino).")
+
+        if filtered_rows == 0:
+            print(f"Aviso: Após filtragem, {path} não tem nenhuma amostra com labels válidas.")
+            self.df = pd.DataFrame(columns=['text', 'class_name', 'id', 'class_id']) 
+            self.datasetid_to_class_id = {}
+            return
+
+        # aplica os IDs do mapa externo
         self.df = self.df.assign(class_id=self.df['class_name'].apply(lambda c: self.class_name_to_id[c]))
         
-        # cria um dicionário para acesso rápido do ID da amostra para o ID da classe
+        # cria o dicionário para acesso rápido
         self.datasetid_to_class_id = self.df.to_dict()['class_id']
 
     def __getitem__(self, item):
@@ -158,7 +176,9 @@ class MyDataset(Dataset):
 
     def num_classes(self):
         """ Retorna o número de classes únicas no dataset """
-        return len(self.df['class_name'].unique())
+        if 'class_id' in self.df.columns:
+            return len(self.df['class_id'].unique())
+        return 0
 
     @staticmethod
     def index_subset(path):

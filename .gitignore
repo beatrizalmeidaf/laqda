@@ -10,3 +10,5 @@ outputs/
 job_laqda.sh 
 job_qevasion.sh 
 run_qevasion.sh
+job_hate.sh 
+job_categ.sh
