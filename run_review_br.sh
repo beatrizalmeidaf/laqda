@@ -2,12 +2,12 @@
 set -e 
 
 cuda=0
-commont="exp_final_binary"
+commont="exp_review"
 learning_rate=1.7e-5
-RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_results_br_exp_binary"
-DATASET_BASE_PATH="datasets-br/reviews_remapped_sentiment_binary"
+RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_reviews_results_br"
+DATASET_BASE_PATH="datasets-br/reviews"
 
-DATASETS_TO_RUN=("B2WCorpus" "BrandsCorpus" "ReProCorpus" "UTLCorpus")
+DATASETS_TO_RUN=("B2WCorpus" "BrandsCorpus" "ReProCorpus" "UTLCorpus" "BuscapeCorpus" "KaggleTweetsCorpus" "OlistCorpus")
 
 for dataset_name in "${DATASETS_TO_RUN[@]}"; do
     echo "============================================================"

@@ -7,7 +7,7 @@ learning_rate=1.7e-5
 RAID_BASE_PATH="/raid/user_beatrizalmeida/laqda_categ_results_br"
 DATASET_BASE_PATH="datasets-br/category"
 
-DATASETS_TO_RUN=("MMLU_PTBR_Corpus" "RecognasaumCorpus" "RulingBRCorpus")
+DATASETS_TO_RUN=("MMLU_PTBR_Corpus" "RecognasummCorpus" "RulingBRCorpus" "EniacCorpus")
 
 for dataset_name in "${DATASETS_TO_RUN[@]}"; do
     echo "============================================================"
