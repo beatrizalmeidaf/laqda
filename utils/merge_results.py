@@ -1,11 +1,12 @@
 import pandas as pd
 import os
 
-base_dir = "/raid/user_beatrizalmeida/laqda_hate_results_br"
+base_dir = "/raid/user_beatrizalmeida/laqda_categ_results_br"
 
 datasets = [
-    "HateBRCorpus",
-    "TuPyCorpus"
+    "MMLU_PTBR_Corpus",
+    "RecognasummCorpus",
+    "RulingBRCorpus"
 ]
 
 paths = ["01", "02", "03", "04", "05"]
