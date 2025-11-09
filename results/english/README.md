@@ -1,4 +1,4 @@
-### Resultados Datasets Classificação
+# Resultados Datasets Classificação
 
 A performance do modelo LAQDA foi avaliada em quatro datasets de classificação de texto amplamente utilizados na língua inglesa. A tabela abaixo resume a acurácia média e o desvio padrão (%) calculados a partir de 5 execuções independentes para cada dataset, nos cenários de 1-shot e 5-shot, como forma de tentar reproduzir os resultados do paper original.
 
@@ -16,7 +16,7 @@ A performance do modelo LAQDA foi avaliada em quatro datasets de classificação
 <p align="center"><em>Figura 1 – Resultados por pasta nos datasets de classificação de texto</em></p>
 
 
-#### Análise dos Resultados
+### Análise dos Resultados
 
 Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performance de modelos de meta-learning, especialmente em cenários de extrema escassez de dados (1-shot).
 
@@ -32,7 +32,7 @@ Os resultados demonstram a eficácia da abordagem LAQDA em melhorar a performanc
 <p align="center"><em>Figura 2 – Acurácia média por dataset de Classificação</em></p>
 
 
-### Resultados em Datasets de Intenção
+# Resultados em Datasets de Intenção
 
 A performance do modelo LAQDA também foi avaliada em quatro datasets de classificação de intenção amplamente utilizados. A tabela abaixo resume a acurácia média e o desvio padrão (%) calculados a partir de 5 execuções independentes para cada dataset, nos cenários de 1-shot e 5-shot.
 
@@ -50,7 +50,7 @@ A performance do modelo LAQDA também foi avaliada em quatro datasets de classif
 <p align="center"><em>Figura 3 – Resultados por pasta nos datasets de intenção</em></p>
 
 
-#### Análise dos Resultados
+### Análise dos Resultados
 
 Os resultados confirmam a robustez do LAQDA em cenários de classificação de intenção:
 
