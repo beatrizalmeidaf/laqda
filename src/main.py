@@ -432,7 +432,8 @@ def test(args, test_dataloader, model, labels_dict):
                 "commont", args.commont, 
                 "data", args.dataFile,
                 "shot", args.numKShot, 
-                "acc", avg_acc 
+                "acc", avg_acc,
+                "f1", avg_f1 
             ]
             writer.writerow(data)
     except Exception as e: print(f"Erro ao escrever no result.csv: {e}")

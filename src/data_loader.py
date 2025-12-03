@@ -222,6 +222,8 @@ def get_label_dict(args):
     a partir do arquivo de treino, em vez de depender de um arquivo pré-existente.
     """
     # constrói o caminho para o arquivo de treino, que está no formato JSONL temporário
+    #train_path = os.path.join(args.dataFile, 'train.json')
+    #train_path = os.path.join(args.dataFile, 'few_shot', '01', 'train.json')
     train_path = os.path.join(args.dataFile, 'train.json')
 
     print(f"Gerando dicionário de rótulos a partir de: {train_path}")
