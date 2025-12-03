@@ -1,0 +1,6 @@
+dataset,folder,acc_55shot,f1_55shot
+QEvasion_Augmented_Results,kshot_55_fold_01,0.8643833333333334,0.8744676005930487
+QEvasion_Augmented_Results,kshot_55_fold_02,0.8817333333333335,0.8859043082643252
+QEvasion_Augmented_Results,kshot_55_fold_03,0.8921833333333334,0.8945021521225305
+QEvasion_Augmented_Results,kshot_55_fold_04,0.8782333333333334,0.88883761195168
+QEvasion_Augmented_Results,kshot_55_fold_05,0.8909833333333333,0.8888083776801029
