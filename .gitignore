@@ -7,5 +7,4 @@ temp_data_for_training/
 *.out
 *.log
 outputs/
-job_qevasion.sh 
-run_qevasion.sh
+

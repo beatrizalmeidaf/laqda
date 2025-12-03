@@ -18,8 +18,8 @@ pip install -r requirements.txt
 > **Atenção:** antes de rodar o projeto, é necessário baixar o modelo **bert-base-uncased** disponível em:
 > [https://huggingface.co/google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased)
 >
-> Após o download, atualize o caminho para o modelo dentro do arquivo `run.sh` de acordo com o diretório local onde ele foi salvo.
-> Os parâmetros específicos para cada conjunto de dados utilizados no artigo estão definidos no `run.sh`.
+> Após o download, atualize o caminho para o modelo dentro do arquivo `run_qevasion.sh` de acordo com o diretório local onde ele foi salvo.
+> Os parâmetros específicos para cada conjunto de dados utilizados no artigo estão definidos no `run_qevasion.sh`.
 
 ```bash
 sh run_qevasion.sh
