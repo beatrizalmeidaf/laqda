@@ -5,6 +5,5 @@ scripts_testes/
 datasets-br/
 temp_data_for_training/
 *.out
-*.log
 outputs/
 
