@@ -7,15 +7,16 @@ Usando GPU: 0
 Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
 Carregando teste oficial...
 Indexando data/Official_Submission/test.json...
+Previsões salvas em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_01/predictions.txt
 
 Resultados Finais do Teste
-Test Loss: 0.6535
-Test Acc: 0.4956
-Test P (macro): 0.4925
-Test R (macro): 0.4956
-Test F1 (macro): 0.4756
-Test AUC: 0.5015
-Test TopKAcc: 0.4998
+Test Loss: 0.6619
+Test Acc: 0.4977
+Test P (macro): 0.4948
+Test R (macro): 0.4977
+Test F1 (macro): 0.4780
+Total de previsões salvas: 30000
+Salvo em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_01/official_submission_preds.txt
 
 >>> Processando: kshot_55_fold_02
 Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/02/train.json
@@ -24,15 +25,16 @@ Usando GPU: 0
 Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
 Carregando teste oficial...
 Indexando data/Official_Submission/test.json...
+Previsões salvas em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_02/predictions.txt
 
 Resultados Finais do Teste
-Test Loss: 0.5379
-Test Acc: 0.5072
-Test P (macro): 0.5067
-Test R (macro): 0.5072
-Test F1 (macro): 0.4864
-Test AUC: 0.5186
-Test TopKAcc: 0.5009
+Test Loss: 0.5173
+Test Acc: 0.5160
+Test P (macro): 0.5194
+Test R (macro): 0.5160
+Test F1 (macro): 0.4954
+Total de previsões salvas: 30000
+Salvo em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_02/official_submission_preds.txt
 
 >>> Processando: kshot_55_fold_03
 Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/03/train.json
@@ -41,15 +43,16 @@ Usando GPU: 0
 Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
 Carregando teste oficial...
 Indexando data/Official_Submission/test.json...
+Previsões salvas em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_03/predictions.txt
 
 Resultados Finais do Teste
-Test Loss: 0.5493
-Test Acc: 0.5047
-Test P (macro): 0.5039
-Test R (macro): 0.5047
-Test F1 (macro): 0.4826
-Test AUC: 0.5070
-Test TopKAcc: 0.5001
+Test Loss: 0.5521
+Test Acc: 0.4953
+Test P (macro): 0.4959
+Test R (macro): 0.4953
+Test F1 (macro): 0.4747
+Total de previsões salvas: 30000
+Salvo em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_03/official_submission_preds.txt
 
 >>> Processando: kshot_55_fold_04
 Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/04/train.json
@@ -58,15 +61,16 @@ Usando GPU: 0
 Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
 Carregando teste oficial...
 Indexando data/Official_Submission/test.json...
+Previsões salvas em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_04/predictions.txt
 
 Resultados Finais do Teste
-Test Loss: 0.5341
-Test Acc: 0.5043
-Test P (macro): 0.5060
-Test R (macro): 0.5043
-Test F1 (macro): 0.4843
-Test AUC: 0.5039
-Test TopKAcc: 0.5000
+Test Loss: 0.5499
+Test Acc: 0.5006
+Test P (macro): 0.5005
+Test R (macro): 0.5006
+Test F1 (macro): 0.4804
+Total de previsões salvas: 30000
+Salvo em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_04/official_submission_preds.txt
 
 >>> Processando: kshot_55_fold_05
 Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/05/train.json
@@ -75,13 +79,14 @@ Usando GPU: 0
 Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
 Carregando teste oficial...
 Indexando data/Official_Submission/test.json...
+Previsões salvas em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_05/predictions.txt
 
 Resultados Finais do Teste
-Test Loss: 0.5646
-Test Acc: 0.4892
-Test P (macro): 0.4878
-Test R (macro): 0.4892
-Test F1 (macro): 0.4653
-Test AUC: 0.4860
-Test TopKAcc: 0.4975
+Test Loss: 0.5618
+Test Acc: 0.4967
+Test P (macro): 0.4950
+Test R (macro): 0.4967
+Test F1 (macro): 0.4750
+Total de previsões salvas: 30000
+Salvo em: /raid/user_beatrizalmeida/qevasion/QEvasion_Augmented_Results/kshot_55_fold_05/official_submission_preds.txt
 Concluído.
