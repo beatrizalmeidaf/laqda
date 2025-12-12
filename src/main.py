@@ -27,7 +27,7 @@ def set_seed(seed):
     random.seed(seed)
 
 
-def init_dataloader(args, mode, labels_dict): # <-- MODIFICADO: recebe labels_dict
+def init_dataloader(args, mode, labels_dict): 
     """
     Inicializa e retorna um Sampler para um modo específico (train, valid, test).
     """

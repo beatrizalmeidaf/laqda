@@ -1,0 +1,87 @@
+Iniciando geração de predições...
+
+>>> Processando: kshot_55_fold_01
+Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/01/train.json
+Dicionário de rótulos criado com sucesso: {'Claims ignorance': 0, 'Clarification': 1, 'Declining to answer': 2, 'Deflection': 3, 'Dodging': 4, 'Explicit': 5, 'General': 6, 'Implicit': 7, 'Partial/half-answer': 8}
+Usando GPU: 0
+Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
+Carregando teste oficial...
+Indexando data/Official_Submission/test.json...
+
+Resultados Finais do Teste
+Test Loss: 0.6535
+Test Acc: 0.4956
+Test P (macro): 0.4925
+Test R (macro): 0.4956
+Test F1 (macro): 0.4756
+Test AUC: 0.5015
+Test TopKAcc: 0.4998
+
+>>> Processando: kshot_55_fold_02
+Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/02/train.json
+Dicionário de rótulos criado com sucesso: {'Claims ignorance': 0, 'Clarification': 1, 'Declining to answer': 2, 'Deflection': 3, 'Dodging': 4, 'Explicit': 5, 'General': 6, 'Implicit': 7, 'Partial/half-answer': 8}
+Usando GPU: 0
+Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
+Carregando teste oficial...
+Indexando data/Official_Submission/test.json...
+
+Resultados Finais do Teste
+Test Loss: 0.5379
+Test Acc: 0.5072
+Test P (macro): 0.5067
+Test R (macro): 0.5072
+Test F1 (macro): 0.4864
+Test AUC: 0.5186
+Test TopKAcc: 0.5009
+
+>>> Processando: kshot_55_fold_03
+Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/03/train.json
+Dicionário de rótulos criado com sucesso: {'Claims ignorance': 0, 'Clarification': 1, 'Declining to answer': 2, 'Deflection': 3, 'Dodging': 4, 'Explicit': 5, 'General': 6, 'Implicit': 7, 'Partial/half-answer': 8}
+Usando GPU: 0
+Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
+Carregando teste oficial...
+Indexando data/Official_Submission/test.json...
+
+Resultados Finais do Teste
+Test Loss: 0.5493
+Test Acc: 0.5047
+Test P (macro): 0.5039
+Test R (macro): 0.5047
+Test F1 (macro): 0.4826
+Test AUC: 0.5070
+Test TopKAcc: 0.5001
+
+>>> Processando: kshot_55_fold_04
+Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/04/train.json
+Dicionário de rótulos criado com sucesso: {'Claims ignorance': 0, 'Clarification': 1, 'Declining to answer': 2, 'Deflection': 3, 'Dodging': 4, 'Explicit': 5, 'General': 6, 'Implicit': 7, 'Partial/half-answer': 8}
+Usando GPU: 0
+Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
+Carregando teste oficial...
+Indexando data/Official_Submission/test.json...
+
+Resultados Finais do Teste
+Test Loss: 0.5341
+Test Acc: 0.5043
+Test P (macro): 0.5060
+Test R (macro): 0.5043
+Test F1 (macro): 0.4843
+Test AUC: 0.5039
+Test TopKAcc: 0.5000
+
+>>> Processando: kshot_55_fold_05
+Gerando dicionário de rótulos a partir de: data/QEvasionCorpus/few_shot/05/train.json
+Dicionário de rótulos criado com sucesso: {'Claims ignorance': 0, 'Clarification': 1, 'Declining to answer': 2, 'Deflection': 3, 'Dodging': 4, 'Explicit': 5, 'General': 6, 'Implicit': 7, 'Partial/half-answer': 8}
+Usando GPU: 0
+Carregando encoder genérico: /raid/user_beatrizalmeida/models/bge-m3
+Carregando teste oficial...
+Indexando data/Official_Submission/test.json...
+
+Resultados Finais do Teste
+Test Loss: 0.5646
+Test Acc: 0.4892
+Test P (macro): 0.4878
+Test R (macro): 0.4892
+Test F1 (macro): 0.4653
+Test AUC: 0.4860
+Test TopKAcc: 0.4975
+Concluído.

@@ -6,4 +6,8 @@ datasets-br/
 temp_data_for_training/
 *.out
 outputs/
-
+teste.py
+laqda_preds_erro_8509.log
+vote_final.py
+inference.sh
+data/Official_Submission
